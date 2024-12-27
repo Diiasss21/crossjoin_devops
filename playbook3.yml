@@ -1,0 +1,12 @@
+- name: Deploy Grafana and Prometheus
+  hosts: 127.0.0.1
+  connection: local
+  become: true
+  tasks:
+    - name: Include Grafana role
+      include_role:
+        name: grafana
+
+    - name: Include Prometheus role
+      include_role:
+        name: prometheus

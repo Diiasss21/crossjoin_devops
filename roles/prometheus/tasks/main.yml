@@ -1,0 +1,32 @@
+- name: Create Prometheus configuration file
+  copy:
+    dest: /tmp/prometheus.yml
+    content: |
+      global:
+        scrape_interval: 15s
+      scrape_configs:
+        - job_name: 'prometheus'
+          static_configs:
+            - targets: ['localhost:9090']
+        - job_name: 'grafana'
+          static_configs:
+            - targets: ['localhost:3000']
+
+- name: Deploy Prometheus container
+  docker_container:
+    name: prometheus
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - "/tmp/prometheus.yml:/etc/prometheus/prometheus.yml"
+    state: started
+
+- name: Verify Prometheus is running
+  uri:
+    url: http://localhost:9090
+    status_code: 200
+  retries: 5
+  delay: 10
+  register: prometheus_health
+  until: prometheus_health is succeeded

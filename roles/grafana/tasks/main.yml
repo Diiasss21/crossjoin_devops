@@ -1,0 +1,21 @@
+- name: Check if Grafana port is free
+  shell: "lsof -i :3000 || true"
+  register: grafana_port_check
+  failed_when: grafana_port_check.stdout != ""
+
+- name: Deploy Grafana container
+  docker_container:
+    name: grafana
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    state: started
+
+- name: Verify Grafana is running
+  uri:
+    url: http://localhost:3000
+    status_code: 200
+  retries: 5
+  delay: 10
+  register: grafana_health
+  until: grafana_health is succeeded
